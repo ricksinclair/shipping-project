@@ -57,7 +57,7 @@ public class ServiceLayer {
         ivm.getInvoiceItems().forEach(invoiceItem -> {
             invoiceItem.setShipCost(calculateShippingCost(ivm));
             invoiceItem.setInvoiceId(finalInvoice.getInvoiceId());
-            client.addInvoiceItem(invoiceItem);
+            invoiceItem = client.addInvoiceItem(invoiceItem);
         });
         ivm.setInvoiceId(invoice.getInvoiceId());
         //build ivm from db
