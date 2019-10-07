@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,6 +23,8 @@ public class ServiceLayer {
     }
 
     public InvoiceViewModel placeOrder(InvoiceViewModel ivm) {
+
+        DecimalFormat df = new DecimalFormat("#####.##");
         ivm.setSurcharge(calculateWeightSurcharge(ivm));
         ivm.setSalesTax(calculateSalesTax(ivm));
         ivm.setTotalCost(ivm.getSalesTax().add(ivm.getSurcharge()).add(calculateShippingCost(ivm)));
@@ -35,9 +38,16 @@ public class ServiceLayer {
         invoice.setSalesTax(ivm.getSalesTax());
         invoice.setShiptoZip(ivm.getShiptoZip());
         invoice.setSurcharge(ivm.getSurcharge());
-        invoice.setTotalCost(ivm.getTotalCost());
-
+        String totalCost = df.format(ivm.getTotalCost());
+        invoice.setTotalCost(new BigDecimal(totalCost));
+        ivm.setTotalCost(invoice.getTotalCost());
         invoice = client.addInvoice(invoice);
+
+        Invoice finalInvoice = invoice;
+        ivm.getInvoiceItems().forEach(invoiceItem -> {
+            invoiceItem.setInvoiceId(finalInvoice.getInvoiceId());
+            client.addInvoiceItem(invoiceItem);
+        });
         ivm.setInvoiceId(invoice.getInvoiceId());
 
         return ivm;
