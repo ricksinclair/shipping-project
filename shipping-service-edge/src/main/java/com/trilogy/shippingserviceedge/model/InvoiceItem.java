@@ -1,5 +1,6 @@
 package com.trilogy.shippingserviceedge.model;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -7,8 +8,11 @@ public class InvoiceItem {
 
     private int invoiceItemId;
     private int invoiceId;
+    @NotNull
     private String itemName;
+    @NotNull
     private String itemDescription;
+    @NotNull
     private int weight;
     private BigDecimal shipCost;
 

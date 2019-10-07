@@ -34,7 +34,7 @@ public class ServiceLayer {
         Invoice invoice = new Invoice();
         invoice.setCustomerId(ivm.getCustomerId());
         //Or set to today
-        invoice.setPurchaseDate(ivm.getPurchaseDate());
+        invoice.setPurchaseDate(LocalDate.now());
         invoice.setSalesTax(ivm.getSalesTax());
         invoice.setShiptoZip(ivm.getShiptoZip());
         invoice.setSurcharge(ivm.getSurcharge());

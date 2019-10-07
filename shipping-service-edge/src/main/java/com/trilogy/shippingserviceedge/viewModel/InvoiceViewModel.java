@@ -19,6 +19,7 @@ public class InvoiceViewModel {
     private BigDecimal totalCost;
     private BigDecimal salesTax;
     private BigDecimal surcharge;
+    @NotNull
     private List<InvoiceItem> invoiceItems;
 
     public int getInvoiceId() {
