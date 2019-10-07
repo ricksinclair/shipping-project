@@ -21,7 +21,7 @@ public class ShippingEdgeController {
     @PostMapping(value = "/orders")
     @ResponseStatus(HttpStatus.CREATED)
     public InvoiceViewModel placeShippingOrder(@RequestBody InvoiceViewModel ivm) {
-        return null;
+        return serviceLayer.placeOrder(ivm);
         //Service layer add invoice
     }
 

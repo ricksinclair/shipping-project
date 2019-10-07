@@ -2,30 +2,65 @@ package com.trilogy.shippingserviceedge.service;
 
 import com.trilogy.shippingserviceedge.model.Invoice;
 import com.trilogy.shippingserviceedge.model.InvoiceItem;
+import com.trilogy.shippingserviceedge.util.feign.ShippingServiceCrudClient;
 import com.trilogy.shippingserviceedge.viewModel.InvoiceViewModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
 public class ServiceLayer {
 
+    @Autowired
+    private ShippingServiceCrudClient client;
+
+    public ServiceLayer(ShippingServiceCrudClient client) {
+        this.client = client;
+    }
+
+    public InvoiceViewModel placeOrder(InvoiceViewModel ivm) {
+        ivm.setSurcharge(calculateWeightSurcharge(ivm));
+        ivm.setSalesTax(calculateSalesTax(ivm));
+        ivm.setTotalCost(ivm.getSalesTax().add(ivm.getSurcharge()).add(calculateShippingCost(ivm)));
+
+        ivm.setInvoiceItems(client.getInvoiceItemsByInvoiceId(ivm.getInvoiceId()));
+
+        Invoice invoice = new Invoice();
+        invoice.setCustomerId(ivm.getCustomerId());
+        //Or set to today
+        invoice.setPurchaseDate(ivm.getPurchaseDate());
+        invoice.setSalesTax(ivm.getSalesTax());
+        invoice.setShiptoZip(ivm.getShiptoZip());
+        invoice.setSurcharge(ivm.getSurcharge());
+        invoice.setTotalCost(ivm.getTotalCost());
+
+        invoice = client.addInvoice(invoice);
+        ivm.setInvoiceId(invoice.getInvoiceId());
+
+        return ivm;
+    }
+
+    public List<InvoiceViewModel> getOrdersByCustomerId(int customerId) {
+        return null;
+    }
+
 
     private BigDecimal calculateShippingCost(InvoiceViewModel  ivm){
-
 
         char firstDigit = ivm.getShiptoZip().charAt(0);
 
      if(firstDigit == '0'|| firstDigit=='1'||firstDigit=='2'){
-         return new BigDecimal("9.99");
+         return new BigDecimal("9.99").multiply(new BigDecimal(ivm.getInvoiceItems().size()));
      }else if (firstDigit == '3'){
-         return new BigDecimal("14.99");
+         return new BigDecimal("14.99").multiply(new BigDecimal(ivm.getInvoiceItems().size()));
 
      }else if(firstDigit == '4'|| firstDigit == '5' || firstDigit == '6'){
-         return new BigDecimal("19.99");
+         return new BigDecimal("19.99").multiply(new BigDecimal(ivm.getInvoiceItems().size()));
      }else if (firstDigit == '7'| firstDigit == '8' || firstDigit == '9'){
-         return new BigDecimal("24.99");
+         return new BigDecimal("24.99").multiply(new BigDecimal(ivm.getInvoiceItems().size()));
      }else{
          throw new IllegalArgumentException("Must input a valid zip code.");
      }
@@ -47,25 +82,20 @@ public class ServiceLayer {
         return  weightSurcharge;
     }
 
-
     private BigDecimal calculateSalesTax(InvoiceViewModel ivm){
       return   calculateShippingCost(ivm).add(calculateWeightSurcharge(ivm)).multiply(new BigDecimal(".072"));
     }
 
 
+    private InvoiceViewModel buildInvoiceViewModel(Invoice invoice){
 
-
-    private InvoiceViewModel buildInvoiceViewModel(Invoice invoice, List<InvoiceItem> invoiceItems){
-
-        invoiceItems.forEach(invoiceItem -> {
-            invoiceItem.setInvoiceId(invoice.getInvoiceId());
-        });
 
         InvoiceViewModel ivm = new InvoiceViewModel();
 
         ivm.setCustomerId(invoice.getCustomerId());
         ivm.setInvoiceId(invoice.getInvoiceId());
-        ivm.setInvoiceItems(invoiceItems);
+        //Client call
+        ivm.setInvoiceItems(client.getInvoiceItemsByInvoiceId(ivm.getInvoiceId()));
         ivm.setPurchaseDate(invoice.getPurchaseDate());
         ivm.setSalesTax(invoice.getSalesTax());
         ivm.setShiptoZip(invoice.getShiptoZip());

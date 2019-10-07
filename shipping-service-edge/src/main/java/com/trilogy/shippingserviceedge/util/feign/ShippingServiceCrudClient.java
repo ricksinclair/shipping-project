@@ -6,6 +6,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @FeignClient(name = "shipping-crud")
 public interface ShippingServiceCrudClient {
 
@@ -24,4 +26,8 @@ public interface ShippingServiceCrudClient {
     @GetMapping(value = "/invoiceItem/{id}")
     @ResponseStatus(HttpStatus.OK)
     public InvoiceItem getInvoiceItemById(@PathVariable int id);
+
+    @GetMapping(value = "/invoiceItem/invoice/{invoiceId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<InvoiceItem> getInvoiceItemsByInvoiceId(@PathVariable int invoiceId);
 }

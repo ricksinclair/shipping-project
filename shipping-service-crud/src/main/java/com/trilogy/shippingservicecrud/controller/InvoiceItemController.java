@@ -48,4 +48,10 @@ public class InvoiceItemController {
         invoiceItemRepository.deleteById(id);
     }
 
+    @GetMapping(value = "/invoiceItem/invoice/{invoiceId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<InvoiceItem> getInvoiceItemsByInvoiceId(@PathVariable int invoiceId) {
+        return invoiceItemRepository.findByInvoiceId(invoiceId);
+    }
+
 }
