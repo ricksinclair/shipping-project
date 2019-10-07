@@ -36,6 +36,7 @@ public class InvoiceController {
         return invoiceRepository.findById(id).orElse(null);
     }
 
+
     @PutMapping(value = "/invoice")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updateInvoice(@RequestBody Invoice invoice) {
