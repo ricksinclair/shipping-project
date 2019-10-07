@@ -24,24 +24,21 @@ public class ServiceLayer {
 
     public InvoiceViewModel placeOrder(InvoiceViewModel ivm) {
 
-        ivm.getInvoiceItems().forEach(invoiceItem -> {
-            invoiceItem.setShipCost(calculateShippingCost(ivm));
-        });
 
 
         DecimalFormat df = new DecimalFormat("#####.##");
+        //set the surcharge
         ivm.setSurcharge(calculateWeightSurcharge(ivm));
+
+        //set the sales tax
         ivm.setSalesTax(calculateSalesTax(ivm));
+        //set the total cost
         ivm.setTotalCost(ivm.getSalesTax()
                 .add(ivm.getSurcharge())
                 .add(calculateShippingCost(ivm)
                         .multiply(new BigDecimal(ivm.getInvoiceItems().size()))));
-        ivm.getInvoiceItems().forEach(invoiceItem -> {
 
-        });
-
-        ivm.setInvoiceItems(client.getInvoiceItemsByInvoiceId(ivm.getInvoiceId()));
-
+        //create invoice from ivm to set to repository
         Invoice invoice = new Invoice();
         invoice.setCustomerId(ivm.getCustomerId());
         //Or set to today
@@ -49,18 +46,21 @@ public class ServiceLayer {
         invoice.setSalesTax(ivm.getSalesTax());
         invoice.setShiptoZip(ivm.getShiptoZip());
         invoice.setSurcharge(ivm.getSurcharge());
+        //format the total cost to constraints
         String totalCost = df.format(ivm.getTotalCost());
         invoice.setTotalCost(new BigDecimal(totalCost));
         ivm.setTotalCost(invoice.getTotalCost());
         invoice = client.addInvoice(invoice);
 
         Invoice finalInvoice = invoice;
+        //set data for each invoice item and send it to db
         ivm.getInvoiceItems().forEach(invoiceItem -> {
+            invoiceItem.setShipCost(calculateShippingCost(ivm));
             invoiceItem.setInvoiceId(finalInvoice.getInvoiceId());
             client.addInvoiceItem(invoiceItem);
         });
         ivm.setInvoiceId(invoice.getInvoiceId());
-
+        //build ivm from db
         return buildInvoiceViewModel(finalInvoice);
     }
 
