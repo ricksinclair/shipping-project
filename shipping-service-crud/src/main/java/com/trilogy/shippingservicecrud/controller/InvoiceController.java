@@ -2,6 +2,7 @@ package com.trilogy.shippingservicecrud.controller;
 
 import com.trilogy.shippingservicecrud.model.Invoice;
 import com.trilogy.shippingservicecrud.repository.InvoiceRepository;
+import org.aspectj.apache.bcel.generic.INVOKEINTERFACE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -49,4 +50,9 @@ public class InvoiceController {
         invoiceRepository.deleteById(id);
     }
 
+    @GetMapping(value = "/invoice/customer/{customerId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Invoice> getInvoicesByCustomerId(@PathVariable int customerId){
+       return  invoiceRepository.findByCustomerId(customerId);
+    }
 }
