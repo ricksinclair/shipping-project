@@ -105,7 +105,9 @@ public class ServiceLayer {
     }
 
     private BigDecimal calculateSalesTax(InvoiceViewModel ivm) {
-        return calculateShippingCost(ivm).add(calculateWeightSurcharge(ivm)).multiply(new BigDecimal(".072"));
+        BigDecimal subtotal =   calculateShippingCost(ivm).add(calculateWeightSurcharge(ivm));
+
+        return   subtotal.multiply(new BigDecimal(".072"));
     }
 
 
