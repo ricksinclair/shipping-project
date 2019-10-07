@@ -24,10 +24,21 @@ public class ServiceLayer {
 
     public InvoiceViewModel placeOrder(InvoiceViewModel ivm) {
 
+        ivm.getInvoiceItems().forEach(invoiceItem -> {
+            invoiceItem.setShipCost(calculateShippingCost(ivm));
+        });
+
+
         DecimalFormat df = new DecimalFormat("#####.##");
         ivm.setSurcharge(calculateWeightSurcharge(ivm));
         ivm.setSalesTax(calculateSalesTax(ivm));
-        ivm.setTotalCost(ivm.getSalesTax().add(ivm.getSurcharge()).add(calculateShippingCost(ivm)));
+        ivm.setTotalCost(ivm.getSalesTax()
+                .add(ivm.getSurcharge())
+                .add(calculateShippingCost(ivm)
+                        .multiply(new BigDecimal(ivm.getInvoiceItems().size()))));
+        ivm.getInvoiceItems().forEach(invoiceItem -> {
+
+        });
 
         ivm.setInvoiceItems(client.getInvoiceItemsByInvoiceId(ivm.getInvoiceId()));
 
@@ -58,22 +69,23 @@ public class ServiceLayer {
     }
 
 
-    private BigDecimal calculateShippingCost(InvoiceViewModel  ivm){
+    private BigDecimal calculateShippingCost(InvoiceViewModel ivm) {
 
         char firstDigit = ivm.getShiptoZip().charAt(0);
+        BigDecimal shippingCost = new BigDecimal("0");
+        if (firstDigit == '0' || firstDigit == '1' || firstDigit == '2') {
+            shippingCost = new BigDecimal("9.99");
+        } else if (firstDigit == '3') {
+            shippingCost = new BigDecimal("14.99");
+        } else if (firstDigit == '4' || firstDigit == '5' || firstDigit == '6') {
+            shippingCost = new BigDecimal("19.99");
+        } else if (firstDigit == '7' | firstDigit == '8' || firstDigit == '9') {
+            shippingCost = new BigDecimal("24.99");
+        } else {
+            throw new IllegalArgumentException("Must input a valid zip code.");
+        }
 
-     if(firstDigit == '0'|| firstDigit=='1'||firstDigit=='2'){
-         return new BigDecimal("9.99").multiply(new BigDecimal(ivm.getInvoiceItems().size()));
-     }else if (firstDigit == '3'){
-         return new BigDecimal("14.99").multiply(new BigDecimal(ivm.getInvoiceItems().size()));
-
-     }else if(firstDigit == '4'|| firstDigit == '5' || firstDigit == '6'){
-         return new BigDecimal("19.99").multiply(new BigDecimal(ivm.getInvoiceItems().size()));
-     }else if (firstDigit == '7'| firstDigit == '8' || firstDigit == '9'){
-         return new BigDecimal("24.99").multiply(new BigDecimal(ivm.getInvoiceItems().size()));
-     }else{
-         throw new IllegalArgumentException("Must input a valid zip code.");
-     }
+        return shippingCost;
     }
 
     private BigDecimal calculateWeightSurcharge(InvoiceViewModel ivm) {
@@ -89,15 +101,15 @@ public class ServiceLayer {
         } else if (totalWeight > 35) {
             weightSurcharge = new BigDecimal("50.00");
         }
-        return  weightSurcharge;
+        return weightSurcharge;
     }
 
-    private BigDecimal calculateSalesTax(InvoiceViewModel ivm){
-      return   calculateShippingCost(ivm).add(calculateWeightSurcharge(ivm)).multiply(new BigDecimal(".072"));
+    private BigDecimal calculateSalesTax(InvoiceViewModel ivm) {
+        return calculateShippingCost(ivm).add(calculateWeightSurcharge(ivm)).multiply(new BigDecimal(".072"));
     }
 
 
-    private InvoiceViewModel buildInvoiceViewModel(Invoice invoice){
+    private InvoiceViewModel buildInvoiceViewModel(Invoice invoice) {
 
 
         InvoiceViewModel ivm = new InvoiceViewModel();
