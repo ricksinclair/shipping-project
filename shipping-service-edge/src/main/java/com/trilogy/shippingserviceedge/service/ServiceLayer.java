@@ -50,7 +50,7 @@ public class ServiceLayer {
         });
         ivm.setInvoiceId(invoice.getInvoiceId());
 
-        return ivm;
+        return buildInvoiceViewModel(finalInvoice);
     }
 
     public List<InvoiceViewModel> getOrdersByCustomerId(int customerId) {
