@@ -30,4 +30,8 @@ public interface ShippingServiceCrudClient {
     @GetMapping(value = "/invoiceItem/invoice/{invoiceId}")
     @ResponseStatus(HttpStatus.OK)
     public List<InvoiceItem> getInvoiceItemsByInvoiceId(@PathVariable int invoiceId);
+
+    @GetMapping(value = "/invoice/customer/{customerId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Invoice> getInvoicesByCustomerId(@PathVariable int customerId);
 }

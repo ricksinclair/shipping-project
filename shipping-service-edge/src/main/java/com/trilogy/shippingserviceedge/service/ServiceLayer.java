@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -65,7 +66,13 @@ public class ServiceLayer {
     }
 
     public List<InvoiceViewModel> getOrdersByCustomerId(int customerId) {
-        return null;
+        List<Invoice> customerInvoices =  client.getInvoicesByCustomerId(customerId);
+        List<InvoiceViewModel> customerViewModels = new ArrayList<>();
+        customerInvoices.forEach(invoice -> {
+           customerViewModels.add( buildInvoiceViewModel(invoice));
+        });
+
+        return customerViewModels;
     }
 
 
